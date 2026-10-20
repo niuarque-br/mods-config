@@ -1,0 +1,7 @@
+{
+  "name": "mods-config",
+  "version": "0.1.0",
+  "description": "Painel com as opções dos mods instalados, para ajustar sem abrir o /config do terminal",
+  "author": { "name": "Niuarque Batista" },
+  "types": "./types/index.d.ts"
+}

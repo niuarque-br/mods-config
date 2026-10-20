@@ -1,0 +1,6 @@
+{
+  "name": "mods-config",
+  "owner": { "name": "Niuarque Batista" },
+  "description": "Config Mods: as opções dos seus mods num painel do Claude Code",
+  "plugins": [{ "name": "mods-config", "source": "./" }]
+}
