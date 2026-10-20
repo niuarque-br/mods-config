@@ -1,5 +1,9 @@
 # ⚙ Config Mods para o Claude Code
 
+<p align="center">
+  <img src="docs/painel.png" width="560" alt="O painel Configurações dos mods com o cartão do Modo Jarvis e o das instruções do projeto">
+</p>
+
 **As opções de todos os seus mods num painel só, dentro do app desktop.** Sem abrir o `/config` de um terminal: escolha, digite e salve ao lado da conversa.
 
 ![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)
