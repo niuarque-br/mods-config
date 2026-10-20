@@ -44,6 +44,12 @@ async function saveTyped($: EngineInterface, row: ConfigRow, text: string): Prom
   return save($, row, parsed.value)
 }
 
+// Opening always re-reads the options: the pane may hold a list read while the mods were still loading.
+async function openPane($: EngineInterface) {
+  await update($, revision, n => n + 1)
+  await $.ui.open({ id: PANE, title: TITLE })
+}
+
 async function saveCard($: EngineInterface, group: PluginRows) {
   const pending = await read($, drafts)
   const edited = group.rows.filter(row => pending[row.key] !== undefined && pending[row.key] !== shown(row.value))
@@ -66,7 +72,7 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'mods-config' }, async $ => {
-    await $.ui.open({ id: PANE, title: TITLE })
+    await openPane($)
     return { text: 'Painel de configurações dos mods aberto.' }
   })
 
@@ -83,7 +89,7 @@ export const register: Register = on => {
     return (
       <Box gap={1}>
         {below}
-        <Button key="mods-config" label="⚙ Config Mods" onPress={() => $.ui.open({ id: PANE, title: TITLE })} />
+        <Button key="mods-config" label="⚙ Config Mods" onPress={() => openPane($)} />
       </Box>
     )
   })
@@ -178,7 +184,14 @@ export const register: Register = on => {
             <Text color={message.isError ? 'error' : 'success'}>{message.text}</Text>
           </Box>
         )}
-        {groups.length === 0 && <Text dimColor>Nenhum mod instalado tem opções.</Text>}
+        {groups.length === 0 && (
+          <Box flexDirection="column" gap={1} marginBottom={1}>
+            <Text dimColor>Nenhum mod instalado tem opções.</Text>
+            <Box>
+              <Button key="reload" label="Recarregar" onPress={() => update($, revision, n => n + 1)} />
+            </Box>
+          </Box>
+        )}
         {mine.length > 0 && (
           <Box marginBottom={1}>
             <Text size="caption" weight="semibold" dimColor>

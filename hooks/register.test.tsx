@@ -24,7 +24,8 @@ function world(on: On, deny?: string) {
   ]
   const sets: { key: string; value: unknown }[] = []
   const opened: unknown[] = []
-  on('config.list', async () => ({ value: rows }))
+  const state = { ready: true }
+  on('config.list', async () => ({ value: state.ready ? rows : [] }))
   on('config.set', async ($, e) => {
     if (deny) return { deny }
     sets.push({ key: e.key, value: e.value })
@@ -41,7 +42,7 @@ function world(on: On, deny?: string) {
     const { Text } = $.ui.resolve(e)
     return <Text>🎙 Modo Jarvis</Text>
   })
-  return { sets, opened }
+  return { sets, opened, state }
 }
 
 const BAND = { hasSurvey: false, isWorking: false, maxRows: 10, bodyColumns: 80, scroll: { offset: 0, bodyRows: 9 }, view: {} }
@@ -125,6 +126,26 @@ test('o nome da voz é um combo que grava na hora', async ($, on) => {
   expect((await ui.find({ key: 'modo-conversa.ttsVoice' }))?.type).toBe('Select')
   await ui.select({ key: 'modo-conversa.ttsVoice', value: 'pt-BR-FranciscaNeural' })
   expect(w.sets).toEqual([{ key: 'modo-conversa.ttsVoice', value: 'pt-BR-FranciscaNeural' }])
+})
+
+test('abrir de novo relê as opções que ainda não existiam', async ($, on) => {
+  const w = world(on)
+  w.state.ready = false
+  const pane = await $.ui.mount({ plugin: 'mods-config', surface: 'desktop', component: 'Pane', requestId: 'mods-config', props: PANE })
+  const band = await $.ui.mount({ plugin: 'mods-config', surface: 'desktop', component: 'AbovePrompt', props: BAND })
+  expect(await pane.find({ text: 'Nenhum mod instalado tem opções.' })).toBeDefined()
+  w.state.ready = true
+  await band.press({ key: 'mods-config' })
+  expect(await pane.find({ text: 'Modo Jarvis' })).toBeDefined()
+})
+
+test('o Recarregar do painel vazio relê as opções', async ($, on) => {
+  const w = world(on)
+  w.state.ready = false
+  const pane = await $.ui.mount({ plugin: 'mods-config', surface: 'desktop', component: 'Pane', requestId: 'mods-config', props: PANE })
+  w.state.ready = true
+  await pane.press({ key: 'reload' })
+  expect(await pane.find({ text: 'Modo Jarvis' })).toBeDefined()
 })
 
 test('número inválido não grava e avisa', async ($, on) => {
